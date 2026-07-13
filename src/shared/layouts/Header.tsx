@@ -37,7 +37,7 @@ const NAV_MENUS = [
 
 // 3존 고정폭 — 상단바와 드롭다운 패널이 같은 값을 공유해야 컬럼이 어긋나지 않는다
 const LOGO_W = 'w-36';
-const AUTH_W = 'w-48';
+const AUTH_W = 'w-74';
 
 export function Header() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export function Header() {
 
         {/* 인증 영역 — 로그인 상태 분기 (GUEST는 USER와 다른 UI) */}
         <div className={`hidden ${AUTH_W} shrink-0 items-center justify-end gap-2 md:flex`}>
-          {!user ? <GuestMenu /> : user.role === 'GUEST' ? <IncompleteMenu /> : <UserMenu nickname={user.nickname} />}
+          {!user ? <GuestMenu /> : user.role === 'GUEST' ? <IncompleteMenu /> : <UserMenu nickname={user.nickname} role={user.role} />}
         </div>
       </div>
 
@@ -153,7 +153,7 @@ function GuestMenu() {
 }
 
 /** 로그인: 닉네임(마이페이지 링크) + 로그아웃(확인 모달) */
-function UserMenu({ nickname }: { nickname: string }) {
+function UserMenu({ nickname, role }: { nickname: string; role: 'USER' | 'ADMIN' }) {
   const navigate = useNavigate();
   const clearAuth = useAuthStore((s) => s.clearAuth);
 
@@ -171,14 +171,15 @@ function UserMenu({ nickname }: { nickname: string }) {
 
   return (
     <>
-      {/* [타이포] text-sm → text-base */}
-      <Link to="/mypage" className="text-base font-medium text-foreground transition-colors hover:text-primary">
-        {nickname}님
-      </Link>
+      <span className="min-w-0 truncate whitespace-nowrap text-base font-medium text-foreground">{nickname}님</span>
+      <Button variant="outline" size="sm" className="shrink-0 rounded-full" asChild>
+        <Link to={role === 'ADMIN' ? '/admin' : '/mypage'}>
+          {role === 'ADMIN' ? '관리자페이지' : '마이페이지'}
+        </Link>
+      </Button>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          {/* [타이포] size="sm" 제거 — 기본 크기 버튼으로 상향 */}
-          <Button variant="outline" className="rounded-full">로그아웃</Button>
+          <Button variant="outline" size="sm" className="shrink-0 rounded-full">로그아웃</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -195,7 +196,7 @@ function UserMenu({ nickname }: { nickname: string }) {
   );
 }
 
-/** GUEST(소셜 가입 미완료): 닉네임 대신 "추가정보 필요" 배지 + 로그아웃 */
+/** GUEST(소셜 가입 미완료): 닉네임 대신 "추가정보 입력 필요" 안내 배지 + 로그아웃 */
 function IncompleteMenu() {
   const navigate = useNavigate();
   const clearAuth = useAuthStore((s) => s.clearAuth);
@@ -215,12 +216,12 @@ function IncompleteMenu() {
     <>
       <button
         onClick={() => navigate('/signup/social')}
-        className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-sm font-semibold text-ring transition-colors hover:bg-primary/25"
+        className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-primary/15 px-3.5 py-2 text-sm font-semibold text-ring transition-colors hover:bg-primary/25"
       >
-        <AlertCircle size={14} />
-        추가정보 입력
+        <AlertCircle size={14} className="shrink-0" />
+        추가정보 입력 필요
       </button>
-      <Button variant="outline" className="rounded-full" onClick={handleLogout}>
+      <Button variant="outline" size="sm" className="shrink-0 rounded-full" onClick={handleLogout}>
         로그아웃
       </Button>
     </>
