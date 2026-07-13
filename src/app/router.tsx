@@ -8,12 +8,21 @@ import { RequireAdmin } from '@/shared/components/common/RequireAdmin';
 import { MainPage } from '@/pages/MainPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
+import { OAuthCallbackPage } from '@/pages/auth/OAuthCallbackPage';
+import { SocialSignupPage } from '@/pages/auth/SocialSignupPage';
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
+import { RequireGuest } from '@/shared/components/common/RequireGuest';
 import { SignupPage } from '@/pages/auth/SignupPage';
 import { AnimalListPage } from '@/pages/animals/AnimalListPage';
 import { AnimalDetailPage } from '@/pages/animals/AnimalDetailPage';
 import { BoardListPage } from '@/pages/board/BoardListPage';
 import { FosterApplyPage } from '@/pages/foster/FosterApplyPage';
-import { MyPage } from '@/pages/mypage/MyPage';
+import { MyPageLayout } from '@/pages/mypage/MyPageLayout';
+import { ProfileTab } from '@/pages/mypage/ProfileTab';
+import { LikedAnimalsTab } from '@/pages/mypage/LikedAnimalsTab';
+import { FosterHistoryTab } from '@/pages/mypage/FosterHistoryTab';
+import { MyPostsTab } from '@/pages/mypage/MyPostsTab';
+import { MyCommentsTab } from '@/pages/mypage/MyCommentsTab';
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage';
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage';
 
@@ -27,6 +36,13 @@ export const router = createBrowserRouter([
       { index: true, element: <MainPage /> }, // `/`
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
+      { path: 'oauth/callback', element: <OAuthCallbackPage /> },   // 소셜 로그인 착지 (백엔드 SuccessHandler 리다이렉트 대상)
+      { path: 'reset-password', element: <ResetPasswordPage /> },   // 비밀번호 재설정 메일 링크 착지
+      {
+        // GUEST 전용 — 소셜 가입 추가정보
+        element: <RequireGuest />,
+        children: [{ path: 'signup/social', element: <SocialSignupPage /> }],
+      },
       { path: 'animals', element: <AnimalListPage /> },
       { path: 'animals/:id', element: <AnimalDetailPage /> },
       { path: 'board/:boardType', element: <BoardListPage /> }, // /board/info, /board/review
@@ -35,7 +51,17 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: 'foster/apply/:animalId', element: <FosterApplyPage /> },
-          { path: 'mypage', element: <MyPage /> },
+          {
+            path: 'mypage',
+            element: <MyPageLayout />,
+            children: [
+              { index: true, element: <ProfileTab /> },          // /mypage = 내 정보
+              { path: 'likes', element: <LikedAnimalsTab /> },
+              { path: 'fosters', element: <FosterHistoryTab /> },
+              { path: 'posts', element: <MyPostsTab /> },
+              { path: 'comments', element: <MyCommentsTab /> },
+            ],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

@@ -1,7 +1,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
+  /* 유동 타이포: 모바일 16px ~ 대형 모니터 약 18.4px 사이를 뷰포트에 비례해 보간.
+     rem 성분 → 사용자 브라우저 글꼴 설정 존중 / vw 성분 → 화면 크기 적응 / clamp → 상하한 고정 */
+  --font-size: clamp(1rem, 0.875rem + 0.15vw, 1.15rem);
   --background: #fffdf5;
   --foreground: #4a3a2a;
   --card: #ffffff;
@@ -126,6 +128,9 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Noto Sans KR(한글) + Nunito(영문/숫자 라운드체) — fonts.css에서 로드, 둘 다 OFL 무료 라이선스.
+    Nunito를 앞에 두면 영문·숫자는 Nunito, 한글은 Noto Sans KR로 자동 폴백된다. */
+    font-family: 'Nunito', 'Noto Sans KR', sans-serif;
   }
 
   /**

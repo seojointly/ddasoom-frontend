@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/shared/stores/authStore';
+import { reissueAccessToken } from '@/shared/api/reissue';
 
 // 공용 axios 인스턴스.
 // - withCredentials: true 고정 → Refresh Token httpOnly 쿠키 자동 동봉(필수).
@@ -19,13 +20,43 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// [응답 인터셉터] 401 → single-flight reissue → 원 요청 재시도 자리.
-// TODO(백엔드 reissue API 확정 후): shared/api/reissue.ts 의 single-flight 함수를 호출해
-//   - 성공: 새 AT를 authStore에 갱신 후 원 요청 재시도(1회 제한 플래그 필수)
-//   - 실패: authStore 초기화 + /login 이동(코드별 분기 없이 일괄 로그아웃)
-//   - reissue 자체의 401은 재진입 금지(무한 루프 방지)
-// 백엔드 reissue 응답 필드·expiresIn 단위가 미확정이라 실제 로직은 아직 구현하지 않는다.
+// [응답 인터셉터] 401 → single-flight reissue → 원 요청 1회 재시도.
+// reissue를 건너뛰는 3가지 경우:
+//   1. 이미 재시도한 요청(_retry) — 무한 루프 방지, 재시도는 1회만
+//   2. reissue 요청 자체의 401 — bare axios라 여기 안 오지만 방어적으로 명시
+//   3. code === 'AUTH_101' (로그인 실패) — 토큰 만료가 아니라 자격증명 오류.
+//      reissue해봤자 의미 없고, 로그인 페이지의 폼 에러 표시가 리다이렉트에 씹히는 버그를 막는다.
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  async (error) => {
+    const originalRequest = error.config;
+    const status = error.response?.status;
+    const errorCode = error.response?.data?.code;
+
+    const shouldReissue =
+      status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/reissue') &&
+      errorCode !== 'AUTH_101';
+
+    if (!shouldReissue) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true; // 이 요청의 재시도는 1회로 제한
+
+    try {
+      const result = await reissueAccessToken(); // single-flight — 동시 401들이 하나의 재발급을 공유
+      useAuthStore.getState().setAccessToken(result.accessToken);
+      originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
+      return axiosInstance(originalRequest); // 원 요청 재시도
+    } catch {
+      // 재발급 실패(AUTH_104 = RT 만료/불일치) → 일괄 로그아웃 (코드별 분기 금지 — 팀 방침)
+      useAuthStore.getState().clearAuth();
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+  },
 );
