@@ -15,7 +15,14 @@ import { Input } from '@/shared/components/ui/input';
 // 제출 성공 → reissue 1회(role claim 갱신 — 백엔드 설계상 필수) → USER로 홈 진입.
 // 검증 규칙은 백엔드 SocialExtraInfoRequest의 @Pattern과 1:1 동일하게 유지한다.
 const socialSignupSchema = z.object({
-  name: z.string().min(2, '이름은 2자 이상이어야 합니다.').max(50, '이름은 50자 이하여야 합니다.'),
+  name: z
+    .string()
+    .min(2, '이름은 2자 이상이어야 합니다.')
+    .max(50, '이름은 50자 이하여야 합니다.')
+    .refine(
+      (value) => /^[가-힣]+$/.test(value) || /^[a-zA-Z\s]+$/.test(value),
+      '이름은 한글 또는 영문만 입력할 수 있습니다.',
+    ),
   nickname: z
     .string()
     .regex(/^[a-zA-Z0-9가-힣]{2,10}$/, '닉네임은 2~10자의 한글, 영문, 숫자만 가능합니다.'),

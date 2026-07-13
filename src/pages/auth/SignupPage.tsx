@@ -27,7 +27,14 @@ const signupSchema = z.object({
       '비밀번호는 대소문자, 숫자, 특수문자 포함 8자 이상이어야 합니다.',
     ),
   passwordConfirm: z.string(),
-  name: z.string().min(2, '이름은 2자 이상이어야 합니다.').max(50, '이름은 50자 이하여야 합니다.'),
+  name: z
+    .string()
+    .min(2, '이름은 2자 이상이어야 합니다.')
+    .max(50, '이름은 50자 이하여야 합니다.')
+    .refine(
+      (value) => /^[가-힣]+$/.test(value) || /^[a-zA-Z\s]+$/.test(value),
+      '이름은 한글 또는 영문만 입력할 수 있습니다.',
+    ),
   nickname: z.string().regex(/^[a-zA-Z0-9가-힣]{2,10}$/, '닉네임은 2~10자의 한글, 영문, 숫자만 가능합니다.'),
   tel: z.string().regex(/^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/, "휴대폰 번호는 '-' 없이 10~11자리여야 합니다."),
 }).refine((data) => data.password === data.passwordConfirm, {
