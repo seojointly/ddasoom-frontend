@@ -19,25 +19,25 @@ import { PostListParams } from '@/features/board/types';
 export const queryKeys = {
   // features/auth
   auth: {},
-  // features/animals — 유기동물
+  // features/animals — 유기동물 (김종식)
   animals: {},
-  // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기)
-  // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기)
+  // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기) (유창호)
+  // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기) (유창호)
   board: {
     all: ['board'] as const,
     lists: () => [...queryKeys.board.all, 'list'] as const,
     list: (params: PostListParams) =>
       [...queryKeys.board.lists(), params] as const,
   },
-  // features/foster — 임시보호
+  // features/foster — 임시보호 (김경우)
   foster: {},
-  // features/mypage — 마이페이지
+  // features/mypage — 마이페이지 (구지훈)
   mypage: {
     all: ['mypage'] as const,
     myInfo: () => [...queryKeys.mypage.all, 'myInfo'] as const,
     recentLoginLogs: () => [...queryKeys.mypage.all, 'recentLoginLogs'] as const,
   },
-  // features/admin — 공지사항, Faq, Qna, 관리자페이지
+  // features/admin — 공지사항, Faq, Qna, 관리자페이지 (이서진)
   admin: {
     all: ['admin'] as const,
         // ===== 공지사항 (이서진) =======
