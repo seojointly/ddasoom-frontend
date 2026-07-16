@@ -96,8 +96,9 @@ export function BoardListPage() {
       {data && data.content.length > 0 && (
         <>
           <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+            {/* board 존재 시 slug는 유효한 문자열임이 보장됨(resolveBoard 통과) */}
             {data.content.map((post) => (
-              <PostCard key={post.postId} post={post} />
+              <PostCard key={post.postId} post={post} slug={slug as string} />
             ))}
           </div>
 
