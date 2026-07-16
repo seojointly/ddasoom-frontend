@@ -39,6 +39,7 @@ import { NoticeDetailPage } from '@/pages/support/NoticeDetailPage';
 import { FaqListPage } from '@/pages/support/FaqListPage';
 import { FaqDetailPage } from '@/pages/support/FaqDetailPage';
 import { ReviewWritePage } from '@/pages/board/ReviewWritePage';
+import { PostDetailPage } from '@/pages/board/PostDetailPage';
 
 // 전체 라우트 정의(단일 파일에서 관리). 역할별 라우트를 한곳에 모아 등록한다.
 // 현재는 경로 등록 + placeholder 페이지 연결까지만. 각 페이지 실제 구현은 도메인 담당자 몫.
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
       { path: 'animals', element: <AnimalListPage /> },
       { path: 'animals/:id', element: <AnimalDetailPage /> },
       { path: 'board/:boardType', element: <BoardListPage /> }, // /board/info, /board/review
+      { path: 'board/:boardType/:postId', element: <PostDetailPage /> },
       { path: 'support/notices', element: <NoticeListPage /> }, // 공지사항 목록 (공개)
       { path: 'support/notices/:noticeId', element: <NoticeDetailPage /> }, // 공지사항 상세 (공개)
       { path: 'support/faqs', element: <FaqListPage /> }, // FAQ 목록 (공개)
