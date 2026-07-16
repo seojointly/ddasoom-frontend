@@ -164,3 +164,7 @@ export function useAnimalsInfiniteQuery(filters: AnimalFilters) {
 | 데이터 변경 (생성/수정/삭제/좋아요) | `useMutation` + 성공 시 `invalidateQueries` |
 | 무한스크롤/더보기 | `useInfiniteQuery` |
 | 인증(401→재발급) |**axios interceptor** 처리 (`shared/api/axiosInstance.ts`) |
+
+- **예외**: 성공 시 세션을 무효화하고 화면을 떠나는 액션(로그인/로그아웃/비밀번호 변경/회원 탈퇴)은
+인증 처리와 동일하게 취급하여 useMutation 없이 API 함수 직접 호출을 허용한다 —
+성공 후 무효화·재조회할 서버 상태가 남지 않기 때문 (예시: ProfileTab의 비밀번호 변경/탈퇴 카드).

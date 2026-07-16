@@ -24,7 +24,11 @@ export const queryKeys = {
   // features/foster — 임시보호
   foster: {},
   // features/mypage — 마이페이지
-  mypage: {},
+  mypage: {
+    all: ['mypage'] as const,
+    myInfo: () => [...queryKeys.mypage.all, 'myInfo'] as const,
+    recentLoginLogs: () => [...queryKeys.mypage.all, 'recentLoginLogs'] as const,
+  },
   // features/admin — 공지사항, Faq, Qna, 관리자페이지
   admin: {
     all: ['admin'] as const,

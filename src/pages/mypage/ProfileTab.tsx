@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,11 +9,12 @@ import { isAxiosError } from 'axios';
 import { LogIn, KeyRound, Trash2 } from 'lucide-react';
 import {
   getMyInfo, updateProfile, changePassword, withdraw, getMyRecentLoginLogs,
-  type MemberInfo, type LoginLogItem,
+  type MemberInfo,
 } from '@/features/mypage/api/memberApi';
 import { checkNicknameAvailable } from '@/features/auth/api/authApi';
 import { LoginLogsModal } from '@/features/mypage/components/LoginLogsModal';
 import { useAuthStore } from '@/shared/stores/authStore';
+import { queryKeys } from '@/shared/api/queryKeys';
 import { Input } from '@/shared/components/ui/input';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -22,26 +24,22 @@ import {
 // 내 정보 관리 — 기본정보(조회↔편집 모드) / 비밀번호 변경(접힌 카드) / 최근 로그인 이력 / 회원 탈퇴.
 // UX 원칙: 폼은 상시 노출하지 않는다 — "수정하기/변경하기"를 눌러야 편집 상태로 전환 (실수 저장 방지).
 export function ProfileTab() {
-  const [info, setInfo] = useState<MemberInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    getMyInfo()
-      .then(setInfo)
-      .catch(() => toast.error('정보를 불러오지 못했습니다.'))
-      .finally(() => setIsLoading(false));
-  }, []);
+  // 서버 상태는 TanStack Query로 — 탭 이동 후 복귀 시 캐시 재사용, 중복 요청 제거
+  const { data: info, isLoading, isError } = useQuery({
+    queryKey: queryKeys.mypage.myInfo(),
+    queryFn: getMyInfo,
+  });
 
   if (isLoading) {
     return <div className="rounded-2xl border border-border bg-white p-8 text-center text-muted-foreground">불러오는 중…</div>;
   }
-  if (!info) {
+  if (isError || !info) {
     return <div className="rounded-2xl border border-border bg-white p-8 text-center text-destructive">정보를 불러오지 못했습니다.</div>;
   }
 
   return (
     <div className="space-y-6">
-      <ProfileInfoCard info={info} onUpdated={setInfo} />
+      <ProfileInfoCard info={info} />
       <PasswordChangeCard />
       <RecentLoginLogsCard />
       <WithdrawCard />
@@ -65,9 +63,9 @@ const profileSchema = z.object({
 });
 type ProfileForm = z.infer<typeof profileSchema>;
 
-function ProfileInfoCard({ info, onUpdated }: { info: MemberInfo; onUpdated: (info: MemberInfo) => void }) {
-  const setAuth = useAuthStore((s) => s.setAuth);
-  const accessToken = useAuthStore((s) => s.accessToken);
+function ProfileInfoCard({ info }: { info: MemberInfo }) {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((s) => s.setAuth);  const accessToken = useAuthStore((s) => s.accessToken);
   const [isEditing, setIsEditing] = useState(false); // 조회 모드 ↔ 편집 모드
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nicknameStatus, setNicknameStatus] = useState<'unchecked' | 'checking' | 'available' | 'taken'>('unchecked');
@@ -111,7 +109,8 @@ function ProfileInfoCard({ info, onUpdated }: { info: MemberInfo; onUpdated: (in
     setIsSubmitting(true);
     try {
       const updated = await updateProfile(form);
-      onUpdated(updated);
+      // PATCH 응답에 갱신된 정보가 이미 있으므로 재조회(invalidate) 대신 캐시에 직접 기록
+      queryClient.setQueryData(queryKeys.mypage.myInfo(), updated);
       // 헤더 닉네임 즉시 동기화
       if (accessToken) setAuth(accessToken, { memberId: updated.memberId, nickname: updated.nickname, role: updated.role });
       toast.success('정보가 수정되었어요.');
@@ -348,12 +347,11 @@ const LOGIN_TYPE_LABEL: Record<string, string> = {
 };
 
 function RecentLoginLogsCard() {
-  const [logs, setLogs] = useState<LoginLogItem[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    getMyRecentLoginLogs().then(setLogs).catch(() => setLogs([]));
-  }, []);
+  const { data: logs } = useQuery({
+    queryKey: queryKeys.mypage.recentLoginLogs(),
+    queryFn: getMyRecentLoginLogs,
+  });
 
   return (
     <section className="rounded-2xl border border-border bg-white p-6">
@@ -368,7 +366,7 @@ function RecentLoginLogsCard() {
           전체 보기
         </button>
       </div>
-      {logs === null ? (
+      {logs === undefined ? (
         <p className="text-sm text-muted-foreground">불러오는 중…</p>
       ) : logs.length === 0 ? (
         <p className="text-sm text-muted-foreground">로그인 이력이 없어요.</p>
