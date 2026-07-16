@@ -28,12 +28,20 @@ export const queryKeys = {
   // features/admin — 공지사항, Faq, Qna, 관리자페이지
   admin: {
     all: ['admin'] as const,
-    // ===== 이서진 (공지사항) =======
+        // ===== 공지사항 (이서진) =======
     notices: () => [...queryKeys.admin.all, 'notices'] as const,
     noticeList: (params: { page?: number; size?: number }) =>
       [...queryKeys.admin.notices(), 'list', params] as const,
     noticeDetail: (id: number) =>
       [...queryKeys.admin.notices(), 'detail', id] as const,
+
+    // ===== FAQ (이서진) =======
+    // FAQ는 페이징이 없으므로 faqList 파라미터 키 불필요 — faqs() 하나로 목록 전체 무효화
+    faqs: () => [...queryKeys.admin.all, 'faqs'] as const,
+    faqDetail: (id: number) => [...queryKeys.admin.faqs(), 'detail', id] as const,
+    faqCategories: () => [...queryKeys.admin.all, 'faqCategories'] as const,
+    // ===== QNA (이서진) =======
+   
 
     // ===== 구지훈 (유저 관리) =======
     members: () => [...queryKeys.admin.all, 'members'] as const,
