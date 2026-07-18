@@ -9,6 +9,7 @@ const MENU_ITEMS = [
   { label: 'FAQ', path: '/admin/faqs' },
   { label: 'QnA', path: '/admin/qnas' },
   { label: '유저 관리', path: '/admin/members' },
+  { label: '임시보호 신청', path: '/admin/fosters' },
 ] as const;
 
 export function AdminLayout() {

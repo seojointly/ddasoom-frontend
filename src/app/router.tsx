@@ -40,6 +40,10 @@ import { FaqListPage } from '@/pages/support/FaqListPage';
 import { FaqDetailPage } from '@/pages/support/FaqDetailPage';
 import { ReviewWritePage } from '@/pages/board/ReviewWritePage';
 import { PostDetailPage } from '@/pages/board/PostDetailPage';
+import { FosterDetailPage } from '@/pages/foster/FosterDetailPage';
+import { FosterEditPage } from '@/pages/foster/FosterEditPage';
+import { AdminFosterListPage } from '@/pages/admin/AdminFosterListPage';
+import { AdminFosterDetailPage } from '@/pages/admin/AdminFosterDetailPage';
 
 // 전체 라우트 정의(단일 파일에서 관리). 역할별 라우트를 한곳에 모아 등록한다.
 // 현재는 경로 등록 + placeholder 페이지 연결까지만. 각 페이지 실제 구현은 도메인 담당자 몫.
@@ -80,6 +84,8 @@ export const router = createBrowserRouter([
               { index: true, element: <ProfileTab /> }, // /mypage = 내 정보
               { path: 'likes', element: <LikedAnimalsTab /> },
               { path: 'fosters', element: <FosterHistoryTab /> },
+              { path: 'fosters/:fosterId/edit', element: <FosterEditPage /> },
+              { path: 'fosters/:fosterId', element: <FosterDetailPage /> },
               { path: 'posts', element: <MyPostsTab /> },
               { path: 'comments', element: <MyCommentsTab /> },
             ],
@@ -117,7 +123,8 @@ export const router = createBrowserRouter([
           { path: 'members/:memberId', element: <AdminMemberDetailPage /> },
 
           // ===== 임시보호 신청 관리 (김경우) =======
-
+          { path: 'fosters', element: <AdminFosterListPage /> },
+          { path: 'fosters/:fosterId', element: <AdminFosterDetailPage /> },
           // ===== 게시글 관리 (유창호) =======
 
           { path: '*', element: <AdminDashboardPage /> }, // /admin/** (관리 서브페이지 자리)
