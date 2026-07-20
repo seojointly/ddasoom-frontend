@@ -57,6 +57,8 @@ export function PostDetailPage() {
   }
 
   const isAuthor = user != null && user.memberId === data.author.memberId;
+  // 수정 화면(ReviewWritePage)은 입양후기 전용 → 다른 게시판 글은 수정 버튼 미노출.
+  const canEdit = isAuthor && data.boardType === 'ADOPTION_REVIEW';
 
   const handleDelete = () => {
     // window.confirm으로 최소 구현 — 디자인 통일이 필요해지면 ui/alert-dialog로 교체
@@ -103,10 +105,14 @@ export function PostDetailPage() {
         </Button>
         {isAuthor && (
           <div className='flex gap-2'>
-            {/* TODO: 게시글 수정 페이지 라우트 확정 후 연결 (별도 작업) */}
-            <Button variant='outline' disabled title='수정 기능 준비 중'>
-              수정
-            </Button>
+            {canEdit && (
+              <Button
+                variant='outline'
+                onClick={() => navigate(`/board/review/${data.postId}/edit`)}
+              >
+                수정
+              </Button>
+            )}
             <Button
               variant='destructive'
               onClick={handleDelete}
