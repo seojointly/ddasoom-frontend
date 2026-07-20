@@ -3,6 +3,7 @@ import { AnimalPreviewSection } from '@/features/animals/components/AnimalPrevie
 import { ContentPreviewSection } from '@/features/board/components/ContentPreviewSection';
 import type { AnimalPreview } from '@/features/animals/types';
 import type { PostPreview } from '@/features/board/types';
+import { useMainAnimalsQuery } from '@/features/animals/hooks/useMainAnimalsQuery';
 
 // 메인 페이지 — 섹션 조립만 담당한다(구현은 features).
 //
@@ -16,12 +17,6 @@ import type { PostPreview } from '@/features/board/types';
 
 // V101__seed_animal.sql 기준 — 활성(deleted_at NULL) + 이미지 보유 4건을 시드 값 그대로 사용.
 // API 연동 시 이 상수를 useQuery 결과로 교체하면 됩니다(파일 상단 ⭐ 주석 참고).
-const MOCK_ANIMALS: AnimalPreview[] = [
-    { animalId: 1, abandonmentId: '413587202600162', kind: 'D', nickname: '뭉치', gender: 'M', typeName: '말티즈', age: '2024년생', location: '서울특별시 강남구', likeCount: 2, isFostered: false, imageUrl: 'http://openapi.animal.go.kr/openapi/service/rest/fileDownloadSrvc/files/shelter/2026/07/202607081107865.jpg' },
-  { animalId: 3, abandonmentId: '450650202601690', kind: 'D', nickname: '초코', gender: 'F', typeName: '믹스견', age: '2022년생', location: '부산광역시 해운대구', likeCount: 1, isFostered: true, imageUrl: 'http://openapi.animal.go.kr/openapi/service/rest/fileDownloadSrvc/files/shelter/2026/07/202607082107857.jpeg' },
-  { animalId: 7, abandonmentId: '448567202601027', kind: 'D', nickname: '대박이', gender: 'M', typeName: '진돗개', age: '2018년생', location: '전라남도 여수시', likeCount: 3, isFostered: false, imageUrl: 'http://openapi.animal.go.kr/openapi/service/rest/fileDownloadSrvc/files/shelter/2026/07/202607081607515.jpg' },
-  { animalId: 5, abandonmentId: '448567202601029', kind: 'D', nickname: '콩이', gender: 'Q', typeName: '푸들', age: '2026년생 추정 2개월', location: '대구광역시 수성구', likeCount: 0, isFostered: false, imageUrl: null },
-];
 
 const MOCK_REVIEWS: PostPreview[] = [
   { postId: 1, title: '우리 가족이 된 초롱이, 정말 행복해요', summary: '처음엔 걱정도 많았는데, 지금은 없어선 안 될 소중한 가족이 되었어요. 입양 과정도 친절하게 안내해 주셔서 감사했습니다.', category: '강아지', authorNickname: '김민지', createdAt: '2026.06.15', commentCount: 24, viewCount: 1032, imageUrl: 'https://images.unsplash.com/photo-1526363269865-60998e11d82d?fm=jpg&w=500' },
@@ -36,6 +31,9 @@ const MOCK_COMMUNITY: PostPreview[] = [
 ];
 
 export function MainPage() {
+  // 유기동물 미리보기(최근 4건) - 로딩 중이면 빈 배열로 섹션은 검색바만 노출
+  const { data: animals } = useMainAnimalsQuery();
+
   return (
     <>
       {/* ── 히어로 ── */}
@@ -61,7 +59,7 @@ export function MainPage() {
       </section>
 
             {/* ── 미리보기 3종 — 목업 주입 (API 연동 방법은 상단 ⭐ 주석) ── */}
-      <AnimalPreviewSection animals={MOCK_ANIMALS} />
+      <AnimalPreviewSection animals={animals ?? []} />
       <ContentPreviewSection
         icon={Heart}
         title="입양 후기"

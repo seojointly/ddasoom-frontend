@@ -1,6 +1,6 @@
 import { axiosInstance } from '@/shared/api/axiosInstance';
 import type { ApiResponse, PageResponse } from '@/shared/types/api';
-import type { AnimalDetail, AnimalFilters, AnimalListItem } from '../types';
+import type { AnimalDetail, AnimalFilters, AnimalListItem, AnimalPreview } from '../types';
 
 // features/animals 도메인 API 모듈.
 // 백엔드: animal/controller/AnimalController.java (/api/animals)
@@ -56,5 +56,11 @@ export async function getLikedAnimals(
     '/animals/me/likes',
     { params: { page, size } },
   );
+  return data.data!;
+}
+
+/** 메인페이지 미리보기 - 최근 등록 4건. GET /api/animals/main (공개) */
+export async function getMainAnimals(): Promise<AnimalPreview[]> {
+  const { data } = await axiosInstance.get<ApiResponse<AnimalPreview[]>>('/animals/main');
   return data.data!;
 }
