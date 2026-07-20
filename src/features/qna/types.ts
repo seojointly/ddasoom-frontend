@@ -25,6 +25,7 @@ export interface QnaSummary {
   status: QnaStatus;
   createdAt: string;
   answeredAt: string | null;
+  updatedAt: string;
 }
 
 /** 스레드 코멘트 — QnaCommentResponse */

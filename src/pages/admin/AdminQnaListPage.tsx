@@ -101,7 +101,7 @@ export function AdminQnaListPage() {
                     {formatDate(qna.createdAt)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {qna.answeredAt ? formatDate(qna.answeredAt) : '-'}
+                    {formatDate(qna.updatedAt)}
                   </TableCell>
                 </TableRow>
               ))
