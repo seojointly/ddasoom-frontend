@@ -12,10 +12,24 @@ export interface PostPreview {
   imageUrl: string; // 썸네일
 }
 
+// categories: 글 작성/수정 select + 목록 필터 공용.
+// ⚠️ 백엔드 PostService.CATEGORY_WHITELIST와 반드시 일치해야 함 (서버가 생성/수정 시 재검증).
 export const BOARD_BY_SLUG = {
-  'dog-info': { boardType: 'DOG_INFO', label: '강아지' },
-  'cat-info': { boardType: 'CAT_INFO', label: '고양이' },
-  review: { boardType: 'ADOPTION_REVIEW', label: '입양 후기' },
+  'dog-info': {
+    boardType: 'DOG_INFO',
+    label: '강아지',
+    categories: ['예방접종'],
+  },
+  'cat-info': {
+    boardType: 'CAT_INFO',
+    label: '고양이',
+    categories: ['예방접종'],
+  },
+  review: {
+    boardType: 'ADOPTION_REVIEW',
+    label: '입양 후기',
+    categories: ['강아지', '고양이'],
+  },
 } as const;
 
 export type BoardSlug = keyof typeof BOARD_BY_SLUG;
@@ -24,6 +38,15 @@ export function resolveBoard(slug: string | undefined) {
   return slug && slug in BOARD_BY_SLUG
     ? BOARD_BY_SLUG[slug as BoardSlug]
     : undefined; // 알 수 없는 slug → 호출부에서 NotFoundPage 렌더
+}
+
+// boardType(백엔드 enum 문자열) → slug 역방향 조회. 상세 페이지에서 수정 경로를 만들 때 사용.
+export function resolveSlugByBoardType(
+  boardType: string,
+): BoardSlug | undefined {
+  return (Object.keys(BOARD_BY_SLUG) as BoardSlug[]).find(
+    (slug) => BOARD_BY_SLUG[slug].boardType === boardType,
+  );
 }
 
 export interface Author {
