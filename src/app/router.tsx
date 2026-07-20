@@ -92,6 +92,8 @@ export const router = createBrowserRouter([
             ],
           },
           { path: 'board/review/write', element: <ReviewWritePage /> },
+          { path: 'board/review/:postId/edit', element: <ReviewWritePage /> }, // 작성 페이지 겸용(수정 모드)
+
           // ===== QNA — 1:1 문의 (이서진) =======
           // 공지/FAQ와 같은 support/ 하위 경로(헤더·푸터 '고객센터' 메뉴와 정합).
           // 단, 공지/FAQ와 달리 로그인 필수라 RequireAuth 안에 둔다.
