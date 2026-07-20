@@ -74,6 +74,9 @@ export function SignupPage() {
         setError('email', { message: '이미 가입된 이메일입니다.' });
       } else if (isAxiosError(error) && error.response?.data?.code === 'AUTH_006') {
         toast.error('인증 메일은 1분에 한 번만 발송할 수 있어요. 잠시 후 다시 시도해 주세요.');
+      } else if (isAxiosError(error) && error.response?.data?.code === 'AUTH_007') {
+        // IP 단위 시간당 발송 제한 — AUTH_006(이메일 단위 60초)과 다른 안내 문구 필요
+        toast.error('인증 메일 요청이 너무 많아요. 1시간 후 다시 시도해 주세요.');
       } else {
         toast.error('메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.');
       }
