@@ -34,7 +34,7 @@ export const queryKeys = {
     }) => [...queryKeys.animals.lists(), filters] as const,
     details: () => [...queryKeys.animals.all(), 'detail'] as const,
     detail: (id: number) => [...queryKeys.animals.details(), id] as const,
-    likedByMe: () => [...queryKeys.animals.all(), "liked-by-me"] as const, // 마이페이지 좋아요 목록
+    likedByMe: () => [...queryKeys.animals.all(), 'liked-by-me'] as const, // 마이페이지 좋아요 목록
     main: () => [...queryKeys.animals.all(), 'main'] as const,
   },
   // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기) (유창호)
@@ -53,6 +53,14 @@ export const queryKeys = {
       [...queryKeys.board.detail(postId), 'comments'] as const,
     commentList: (postId: number, page: number) =>
       [...queryKeys.board.comments(postId), page] as const,
+    // 마이페이지 "내가 쓴 글" — lists() 하위에 두어 게시글 생성/삭제 뮤테이션의
+    // invalidateQueries(lists())가 이 캐시도 함께 무효화하도록 계층을 맞춘다.
+    myPosts: (params: { boardType?: string; page?: number }) =>
+      [...queryKeys.board.lists(), 'my', params] as const,
+    // 마이페이지 "내가 쓴 댓글" — 댓글 뮤테이션은 comments(postId)만 무효화하므로 이 키는 자동
+    // 갱신되지 않지만, 마이페이지 진입 시 refetch(기본 staleTime 0)로 충분하다고 판단.
+    myComments: (page: number) =>
+      [...queryKeys.board.all, 'myComments', page] as const,
   },
   // features/foster — 임시보호 (김경우)
   foster: {
@@ -76,19 +84,28 @@ export const queryKeys = {
     all: ['admin'] as const,
     // ===== 대시보드 (구지훈) =======
     dashboard: () => [...queryKeys.admin.all, 'dashboard'] as const,
-    dashboardPendingSummary: () => [...queryKeys.admin.dashboard(), 'pendingSummary'] as const,
-    dashboardStatusDistribution: () => [...queryKeys.admin.dashboard(), 'statusDistribution'] as const,
-    dashboardNewMembers: () => [...queryKeys.admin.dashboard(), 'newMembers'] as const,
+    dashboardPendingSummary: () =>
+      [...queryKeys.admin.dashboard(), 'pendingSummary'] as const,
+    dashboardStatusDistribution: () =>
+      [...queryKeys.admin.dashboard(), 'statusDistribution'] as const,
+    dashboardNewMembers: () =>
+      [...queryKeys.admin.dashboard(), 'newMembers'] as const,
 
     // ===== 통계 (구지훈) =======
     statistics: () => [...queryKeys.admin.all, 'statistics'] as const,
-    statFosterMonthly: (year: number) => [...queryKeys.admin.statistics(), 'fosterMonthly', year] as const,
-    statApprovalRate: () => [...queryKeys.admin.statistics(), 'approvalRate'] as const,
-    statAvgDuration: () => [...queryKeys.admin.statistics(), 'avgDuration'] as const,
-    statKindRatio: () => [...queryKeys.admin.statistics(), 'kindRatio'] as const,
+    statFosterMonthly: (year: number) =>
+      [...queryKeys.admin.statistics(), 'fosterMonthly', year] as const,
+    statApprovalRate: () =>
+      [...queryKeys.admin.statistics(), 'approvalRate'] as const,
+    statAvgDuration: () =>
+      [...queryKeys.admin.statistics(), 'avgDuration'] as const,
+    statKindRatio: () =>
+      [...queryKeys.admin.statistics(), 'kindRatio'] as const,
     statRegion: () => [...queryKeys.admin.statistics(), 'region'] as const,
-    statTopAnimals: () => [...queryKeys.admin.statistics(), 'topAnimals'] as const,
-    statSignupDaily: (offset: number) => [...queryKeys.admin.statistics(), 'signupDaily', offset] as const,
+    statTopAnimals: () =>
+      [...queryKeys.admin.statistics(), 'topAnimals'] as const,
+    statSignupDaily: (offset: number) =>
+      [...queryKeys.admin.statistics(), 'signupDaily', offset] as const,
 
     // ===== 공지사항 (이서진) =======
     notices: () => [...queryKeys.admin.all, 'notices'] as const,
@@ -138,8 +155,9 @@ export const queryKeys = {
       [...queryKeys.admin.members(), 'loginLogs', id, page] as const,
     // ===== 김경우 (임시보호 신청 관리) =======
     fosters: () => [...queryKeys.admin.all, 'fosters'] as const,
-    fosterList: (params: import('@/features/foster/types').FosterAdminListParams) =>
-      [...queryKeys.admin.fosters(), 'list', params] as const,
+    fosterList: (
+      params: import('@/features/foster/types').FosterAdminListParams,
+    ) => [...queryKeys.admin.fosters(), 'list', params] as const,
     fosterDetail: (fosterId: number) =>
       [...queryKeys.admin.fosters(), 'detail', fosterId] as const,
     // ===== 유창호 (게시글 관리) =======
@@ -170,5 +188,4 @@ export const queryKeys = {
       [...queryKeys.support.faqs(), 'detail', id] as const,
     faqCategories: () => [...queryKeys.support.all, 'faqCategories'] as const,
   },
-
 } as const;
