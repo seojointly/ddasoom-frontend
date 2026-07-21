@@ -2,6 +2,8 @@ import { axiosInstance } from '@/shared/api/axiosInstance';
 import type { ApiResponse, PageResponse } from '@/shared/types/api';
 import type {
   CommentItem,
+  MyCommentItem,
+  MyPostItem,
   PostCreatePayload,
   PostDetail,
   PostListItem,
@@ -104,4 +106,33 @@ export async function updatePost(
   payload: PostUpdatePayload,
 ): Promise<void> {
   await axiosInstance.patch<ApiResponse<void>>(`/posts/${postId}`, payload);
+}
+
+// ===== 마이페이지 — 백엔드: PostController (/api/posts/my, /api/posts/comments/my) =====
+
+/**
+ * 내가 쓴 글 목록 — createdAt DESC, size 기본 10.
+ * boardType이 undefined면 axios가 파라미터에서 자동 제외 → 전체 보드 조회.
+ */
+export async function getMyPosts(params: {
+  boardType?: string;
+  page?: number;
+  size?: number;
+}): Promise<PageResponse<MyPostItem>> {
+  const res = await axiosInstance.get<ApiResponse<PageResponse<MyPostItem>>>(
+    '/posts/my',
+    { params },
+  );
+  return res.data.data as PageResponse<MyPostItem>;
+}
+
+/** 내가 쓴 댓글 목록 — createdAt DESC. 원글이 삭제된 댓글은 서버가 제외하고 내려준다 */
+export async function getMyComments(
+  page: number,
+): Promise<PageResponse<MyCommentItem>> {
+  const res = await axiosInstance.get<ApiResponse<PageResponse<MyCommentItem>>>(
+    '/posts/comments/my',
+    { params: { page, size: 10 } },
+  );
+  return res.data.data as PageResponse<MyCommentItem>;
 }
