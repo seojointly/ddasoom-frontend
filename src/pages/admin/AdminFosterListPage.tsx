@@ -108,9 +108,15 @@ function formatDate(iso: string | null): string {
 }
 
 function getExpectedEndAt(foster: FosterAdminListItem): string | null {
-  return foster.status === 'EXTENDED' && foster.fosterExtendAt
-    ? foster.fosterExtendAt
-    : foster.fosterEndAt;
+  if (foster.status === 'ENDED' && foster.fosterCompleteAt) {
+    return foster.fosterCompleteAt;
+  }
+
+  if (foster.status === 'EXTENDED' && foster.fosterExtendAt) {
+    return foster.fosterExtendAt;
+  }
+
+  return foster.fosterEndAt;
 }
 
 function getDDayInfo(iso: string | null): {

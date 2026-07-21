@@ -11,6 +11,9 @@ export function useCreateFoster() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.foster.lists(),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.foster.pendingApplications(),
+      });
     },
   });
 }

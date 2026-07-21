@@ -8,10 +8,27 @@ export function useDeleteAdminFoster() {
 
   return useMutation({
     mutationFn: deleteAdminFoster,
-    onSuccess: () => {
+    onSuccess: (_, fosterId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.admin.fosters(),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.admin.fosterDetail(fosterId),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.foster.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.foster.details(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.foster.pendingApplications(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.animals.all(),
+      });
+
       toast.success('임시보호 신청이 삭제되었습니다.');
     },
   });
