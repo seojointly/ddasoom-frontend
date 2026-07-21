@@ -1,7 +1,8 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuthStore } from '@/shared/stores/authStore';
 import { cn } from '@/shared/components/ui/utils';
-import { Flag } from 'lucide-react';
+import { Flag, ExternalLink } from 'lucide-react';
+import dogLogo from '@/assets/dog.png';
 
 // 관리자 사이드바 메뉴 정의 — 새 관리 페이지 추가 시 여기에 한 줄만 추가
 const MENU_ITEMS = [
@@ -24,10 +25,17 @@ export function AdminLayout() {
   return (
     <div className='flex min-h-screen'>
       {/* 사이드바 — 다크 네이비 */}
-      <aside className='flex w-56 flex-col bg-slate-900 text-slate-100'>
-        <div className='border-b border-slate-700 px-6 py-5'>
-          <span className='text-lg font-semibold'>따숨 관리자</span>
-        </div>
+      <aside className="flex w-56 flex-col bg-slate-900 text-slate-100">
+        <a href="/"
+          className="group flex items-center gap-2.5 border-b border-slate-700 px-6 py-5 transition-colors hover:bg-slate-800"
+          title="따숨 홈으로 이동"
+        >
+          <img src={dogLogo} alt="따숨" className="h-7 w-7 rounded-full object-cover" />
+          <span className="text-lg font-semibold">
+            따숨 <span className="text-slate-400">관리자</span>
+          </span>
+          <ExternalLink size={14} className="ml-auto text-slate-500 transition-colors group-hover:text-slate-300" />
+        </a>
 
         <nav className='flex-1 px-3 py-4'>
           {MENU_ITEMS.map((item) => (
