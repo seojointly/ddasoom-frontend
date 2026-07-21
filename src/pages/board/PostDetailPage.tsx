@@ -34,6 +34,7 @@ export function PostDetailPage() {
   );
   const deleteMutation = useDeletePost();
   const [reportOpen, setReportOpen] = useState(false);
+  const [memberReportOpen, setMemberReportOpen] = useState(false);
 
   if (!board || parsedId == null) return <NotFoundPage />;
 
@@ -88,9 +89,22 @@ export function PostDetailPage() {
       <h1 className='mb-4 text-3xl font-bold text-foreground'>{data.title}</h1>
 
       <div className='mb-8 flex items-center justify-between border-b border-border pb-4'>
-        <span className='text-sm font-medium text-ring'>
-          {data.author.nickname}
-        </span>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm font-medium text-ring'>
+            {data.author.nickname}
+          </span>
+          {/* 작성자(회원) 신고 — 게시글 신고와 동일하게 로그인한 비작성자에게만 노출 */}
+          {!isAuthor && user != null && (
+            <button
+              type='button'
+              onClick={() => setMemberReportOpen(true)}
+              className='flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive'
+            >
+              <Siren size={12} />
+              작성자 신고
+            </button>
+          )}
+        </div>
         <div className='flex items-center gap-3 text-xs text-[#C4B4A4]'>
           <span className='flex items-center gap-1'>
             <Eye size={13} />
@@ -148,6 +162,14 @@ export function PostDetailPage() {
         targetId={data.postId}
         open={reportOpen}
         onOpenChange={setReportOpen}
+      />
+
+      {/* 작성자(회원) 신고 모달 — targetType은 MEMBER, targetId는 작성자 회원 PK */}
+      <ReportModal
+        targetType='MEMBER'
+        targetId={data.author.memberId}
+        open={memberReportOpen}
+        onOpenChange={setMemberReportOpen}
       />
 
       {/* ── 댓글 ── */}

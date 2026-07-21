@@ -2,12 +2,6 @@ import { axiosInstance } from '@/shared/api/axiosInstance';
 import type { ApiResponse } from '@/shared/types/api';
 import type { UploadedImage } from '@/shared/components/editor/editorImageApi';
 
-/**
- * FAQ 1건당 첨부 상한 — 공용 이미지 API(IMAGE_003) 기준. QnA와 동일하게 10장.
- * ⚠️ 에디터(shared/components/editor)의 MAX_IMAGES(20)와는 다른 값이다(첨부형 별도 상한).
- */
-export const MAX_FAQ_IMAGES = 10;
-
 // features/admin 도메인 API 모듈 — 관리자 FAQ 관리.
 // 백엔드: support/controller/AdminFaqController.java (/api/admin/faqs, hasRole(ADMIN))
 // ⚠️ Notice와 달리 목록은 페이징 없이 List 통째로 반환한다.
@@ -70,9 +64,9 @@ export async function createFaq(payload: FaqPayload): Promise<FaqDetail> {
   return res.data.data as FaqDetail;
 }
 
-/** FAQ 수정 — PATCH /api/admin/faqs/{faqId} */
+/** FAQ 수정 — PUT /api/admin/faqs/{faqId} */
 export async function updateFaq(faqId: number, payload: FaqPayload): Promise<FaqDetail> {
-  const res = await axiosInstance.patch<ApiResponse<FaqDetail>>(`/admin/faqs/${faqId}`, payload);
+  const res = await axiosInstance.put<ApiResponse<FaqDetail>>(`/admin/faqs/${faqId}`, payload);
   return res.data.data as FaqDetail;
 }
 

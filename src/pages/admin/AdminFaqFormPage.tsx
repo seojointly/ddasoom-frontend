@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,12 +9,9 @@ import {
   useUpdateFaq,
   useFaqCategories,
 } from '@/features/admin/hooks/useFaqs';
-import { MAX_FAQ_IMAGES } from '@/features/admin/api/faqApi';
-import { ImageAttachInput } from '@/shared/components/common/ImageAttachInput';
-import type { UploadedImage } from '@/shared/components/editor/editorImageApi';
+import { RichTextEditor, type RichTextEditorHandle } from '@/shared/components/editor';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
-import { Textarea } from '@/shared/components/ui/textarea';
 import { Label } from '@/shared/components/ui/label';
 import {
   Select,
@@ -24,11 +21,11 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 
-// 백엔드 제약과 맞춤: question VARCHAR(255) NOT NULL, answer TEXT NOT NULL, category Enum NOT NULL
+// category/question만 폼(RHF)으로 검증한다. answer는 RichTextEditor가 ref(getPayload)로 조달하므로 폼 밖에서 관리.
+// 백엔드 제약: question VARCHAR(255) NOT NULL, category Enum NOT NULL
 const faqSchema = z.object({
   category: z.string().min(1, '카테고리를 선택해 주세요.'),
   question: z.string().min(1, '질문을 입력해 주세요.').max(255, '질문은 255자를 초과할 수 없습니다.'),
-  answer: z.string().min(1, '답변을 입력해 주세요.'),
 });
 type FaqForm = z.infer<typeof faqSchema>;
 
@@ -43,40 +40,58 @@ export function AdminFaqFormPage() {
   const createFaq = useCreateFaq();
   const updateFaq = useUpdateFaq();
 
-  // 첨부 이미지는 선업로드 방식이라 imageId 목록을 폼 밖 state로 관리(QnaWritePage와 동일).
-  const [images, setImages] = useState<UploadedImage[]>([]);
+  const editorRef = useRef<RichTextEditorHandle>(null);
 
   const {
     register,
     handleSubmit,
-    reset,
     control,
     formState: { errors },
   } = useForm<FaqForm>({
     resolver: zodResolver(faqSchema),
-    defaultValues: { category: '', question: '', answer: '' },
+    defaultValues: { category: '', question: '' },
+    values: isEdit && faq ? { category: faq.category, question: faq.question } : undefined,
   });
 
-  // 수정 모드 — 기존 데이터 로드되면 폼과 첨부 이미지에 채움
-  useEffect(() => {
-    if (isEdit && faq) {
-      reset({ category: faq.category, question: faq.question, answer: faq.answer });
-      setImages(faq.images);
-    }
-  }, [isEdit, faq, reset]);
+  const onSubmit = async (form: FaqForm) => {
+    if (!editorRef.current) return;
 
-  const onSubmit = (form: FaqForm) => {
-    const payload = { ...form, imageIds: images.map((image) => image.imageId) };
-    if (isEdit && numericId != null) {
-      updateFaq.mutate(
-        { faqId: numericId, payload },
-        { onSuccess: () => navigate('/admin/faqs') },
-      );
-    } else {
-      createFaq.mutate(payload, {
-        onSuccess: () => navigate('/admin/faqs'),
-      });
+    // 1. 미업로드 이미지 업로드 → 확정 HTML + imageIds. 실패 토스트는 에디터가 표시하므로 여기선 return만.
+    let payload;
+    try {
+      payload = await editorRef.current.getPayload();
+    } catch {
+      return;
     }
+
+    // 2. FAQ 생성/수정
+    try {
+      if (isEdit && numericId != null) {
+        await updateFaq.mutateAsync({
+          faqId: numericId,
+          payload: {
+            category: form.category,
+            question: form.question,
+            answer: payload.html,
+            imageIds: payload.imageIds,
+          },
+        });
+      } else {
+        await createFaq.mutateAsync({
+          category: form.category,
+          question: form.question,
+          answer: payload.html,
+          imageIds: payload.imageIds,
+        });
+      }
+    } catch {
+      return; // mutation 실패 — 임시 blob은 유지(재시도 가능)
+    }
+
+    // 3. 저장 성공 후 임시 blob 정리 (누락 시 IndexedDB에 blob 누적)
+    await editorRef.current.cleanup();
+
+    navigate('/admin/faqs');
   };
 
   const isSubmitting = createFaq.isPending || updateFaq.isPending;
@@ -116,25 +131,21 @@ export function AdminFaqFormPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="answer">답변</Label>
-          <Textarea
-            id="answer"
-            {...register('answer')}
-            placeholder="답변을 입력하세요"
-            rows={12}
-          />
-          {errors.answer && <p className="text-sm text-destructive">{errors.answer.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label>첨부 이미지 (선택)</Label>
-          <ImageAttachInput
-            ownerType="FAQ"
-            value={images}
-            onChange={setImages}
-            maxImages={MAX_FAQ_IMAGES}
-            disabled={isSubmitting}
-          />
+          <Label>답변</Label>
+          {/* 수정 모드는 기존 answer(HTML)를 initialHtml로 복원해야 하므로 로드 완료 후 마운트한다.
+              RichTextEditor는 initialHtml을 첫 마운트 시점에만 읽기 때문. */}
+          {isEdit && !faq ? (
+            <div className="min-h-[280px] rounded-md border border-border p-4 text-sm text-muted-foreground">
+              불러오는 중…
+            </div>
+          ) : (
+            <RichTextEditor
+              ref={editorRef}
+              ownerType="FAQ"
+              initialHtml={isEdit ? faq?.answer ?? '' : ''}
+              placeholder="답변을 입력하세요"
+            />
+          )}
         </div>
 
         <div className="flex gap-2">
