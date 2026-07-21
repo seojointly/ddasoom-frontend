@@ -51,9 +51,17 @@ export function LoginPage() {
       // GUEST(소셜 가입 미완료)가 일반 로그인할 일은 없지만(password null) 방어적으로 홈으로 통일
       navigate('/');
     } catch (error) {
-      // 백엔드 정책: 로그인 실패는 전부 401 AUTH_101 (계정없음/비번틀림/탈퇴 구분 없음 — 열거 공격 방지)
-      if (isAxiosError(error) && error.response?.data?.code === 'AUTH_101') {
+      // 백엔드 로그인 응답(C안):
+      //  - AUTH_101(401): 계정없음/비번틀림/소셜전용 — 사유 미구분 (열거 공격 방지)
+      //  - AUTH_109(403): 탈퇴 회원 (비번 일치 시에만) — 배너 안내
+      //  - AUTH_110(403): 숨김(제재) 회원 (비번 일치 시에만) — 배너 안내
+      const code = isAxiosError(error) ? error.response?.data?.code : undefined;
+      if (code === 'AUTH_101') {
         setError('root', { message: '이메일 또는 비밀번호가 일치하지 않습니다.' });
+      } else if (code === 'AUTH_109') {
+        setError('root', { message: '탈퇴 처리된 계정이에요. 계정 복구를 원하시면 1:1 문의를 이용해 주세요.' });
+      } else if (code === 'AUTH_110') {
+        setError('root', { message: '이용이 제한된 계정이에요. 자세한 사항은 1:1 문의를 이용해 주세요.' });
       } else {
         toast.error('로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
       }

@@ -34,9 +34,10 @@ axiosInstance.interceptors.response.use(
     const errorCode = error.response?.data?.code;
 
     // 403은 재시도로 풀리지 않는 최종 상태 — 재발급 흐름을 타지 않고 즉시 안내 화면으로.
-    // shouldReissue 판별보다 먼저 처리해도 무방(401이 아니므로 그 분기와 겹치지 않음).
-    //window.location.href를 쓴 이유 — 인터셉터는 React 컴포넌트 트리 바깥이라 useNavigate를 못 씁니다. 인증 관련 강제 이동에서 흔히 쓰는 방식입니다.
-    if (status === 403) {
+    // 단, 로그인 요청의 403(탈퇴 AUTH_109 / 숨김 AUTH_110)은 예외 — LoginPage가 배너로 안내해야 하므로
+    // forbidden 리다이렉트에서 제외하고 그대로 reject해 호출부 catch로 넘긴다.
+    const isLoginRequest = originalRequest.url?.includes('/auth/login');
+    if (status === 403 && !isLoginRequest) {
       window.location.href = '/forbidden';
       return Promise.reject(error);
     }
