@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useNotice } from '@/features/support/hooks/useNotices';
 import { SafeHtmlViewer } from '@/shared/components/editor';
 import { Button } from '@/shared/components/ui/button';
+import { Card } from '@/shared/components/ui/card';
 
 export function NoticeDetailPage() {
   const navigate = useNavigate();
@@ -29,11 +30,14 @@ export function NoticeDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <h1 className="mb-2 text-2xl font-semibold">{data.title}</h1>
-      <p className="mb-6 text-sm text-muted-foreground">{data.createdAt.slice(0, 10)}</p>
+      {/* 크림색 페이지 배경 위 흰 카드로 본문 가독성 확보 */}
+      <Card className="gap-0 p-6 shadow-sm md:p-8">
+        <h1 className="mb-2 text-2xl font-semibold">{data.title}</h1>
+        <p className="mb-6 text-sm text-muted-foreground">{data.createdAt.slice(0, 10)}</p>
 
-      {/* content는 HTML 문자열 — SafeHtmlViewer가 sanitize + data-image-id 허용 후 렌더 */}
-      <SafeHtmlViewer html={data.content} className="min-h-40 border-t pt-6" />
+        {/* content는 HTML 문자열 — SafeHtmlViewer가 sanitize + data-image-id 허용 후 렌더 */}
+        <SafeHtmlViewer html={data.content} className="min-h-40 border-t pt-6" />
+      </Card>
 
       <div className="mt-8 flex justify-center">
         <Button variant="outline" onClick={() => navigate('/support/notices')}>

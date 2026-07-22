@@ -12,6 +12,9 @@ export function useDeleteFoster() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.foster.lists(),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.foster.pendingApplications(),
+      });
       queryClient.removeQueries({
         queryKey: queryKeys.foster.detail(fosterId),
       });

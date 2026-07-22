@@ -80,15 +80,6 @@ export function FosterEditPage() {
         <FosterStatusBadge status={data.status} />
       </div>
 
-      {data.status === 'REJECTED' && (
-        <Alert className="mb-6">
-          <AlertTitle>신청 거절 상태입니다.</AlertTitle>
-          <AlertDescription>
-            내용을 수정해도 현재 신청 상태는 자동으로 변경되지 않습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <FosterEditForm key={data.fosterId} foster={data} />
     </section>
   );

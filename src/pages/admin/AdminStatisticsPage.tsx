@@ -51,18 +51,17 @@ export function AdminStatisticsPage() {
     <div className="p-6">
       <h1 className="mb-6 text-xl font-semibold">통계</h1>
 
-      {/* 핵심 숫자 카드 3종 */}
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* 핵심 숫자 카드 4종 */}
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="임보 승인율 / 반려율"
-          value={approval ? (
-            <>
-              <span className="text-[#3b82f6]">{approvalRate}%</span>
-              <span className="mx-1.5 text-lg text-muted-foreground">/</span>
-              <span className="text-destructive">{rejectRate}%</span>
-            </>
-          ) : '—'}
-          hint={`승인 ${approval?.approvedCount ?? 0}건 / 반려 ${approval?.rejectedCount ?? 0}건 (대기 제외)`}
+          label="임보 승인율"
+          value={approval ? <span className="text-[#3b82f6]">{approvalRate}%</span> : '—'}
+          hint={`승인 ${approval?.approvedCount ?? 0}건 (대기 제외)`}
+        />
+        <StatCard
+          label="임보 반려율"
+          value={approval ? <span className="text-destructive">{rejectRate}%</span> : '—'}
+          hint={`반려 ${approval?.rejectedCount ?? 0}건 (대기 제외)`}
         />
         <StatCard
           label="평균 임보 지속기간"

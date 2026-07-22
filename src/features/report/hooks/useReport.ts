@@ -1,15 +1,19 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { createReport, type ReportCreatePayload } from '@/features/report/api/reportApi';
 import { getReportErrorMessage } from '@/features/report/util';
+import { queryKeys } from '@/shared/api/queryKeys';
 
 // 유저 신고 TanStack Query 훅.
-// 신고 결과는 어떤 목록/상세에도 반영되지 않으므로(관리자만 열람) invalidate 대상이 없다.
+// 접수 성공 시 관리자 신고 목록/상세(queryKeys.admin.reports())를 무효화해
+// 이미 열려 있는 관리자 화면에도 새 신고가 반영되게 한다(승인/반려 뮤테이션과 동일 규칙).
 
 export function useCreateReport() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: ReportCreatePayload) => createReport(payload),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.reports() });
       toast.success('신고가 접수되었습니다.');
     },
     onError: (error) => {

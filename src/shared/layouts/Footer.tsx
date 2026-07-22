@@ -9,7 +9,7 @@ const FOOTER_COLUMNS = [
     title: '서비스',
     links: [
       { label: '유기동물 찾기', to: '/animals' },
-      { label: '임시보호 신청', to: '/foster/apply' },
+      { label: '임시보호 신청', to: '/mypage/fosters' },
       { label: '커뮤니티', to: '/board' },
     ],
   },

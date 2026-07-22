@@ -93,26 +93,15 @@ const fosterAdminEditSchema = z
     if (
       values.fosterEndAt &&
       values.fosterExtendAt &&
-      values.fosterEndAt > values.fosterExtendAt
+      values.fosterEndAt >= values.fosterExtendAt
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['fosterExtendAt'],
-        message: '연장일은 기본 종료일보다 빠를 수 없습니다.',
+        message: '연장일은 기본 종료일보다 늦어야 합니다.'
       });
     }
 
-    if (
-      values.fosterStartAt &&
-      values.fosterCompleteAt &&
-      values.fosterStartAt > values.fosterCompleteAt
-    ) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['fosterCompleteAt'],
-        message: '최종 종료일은 시작일보다 빠를 수 없습니다.',
-      });
-    }
   });
 
 type FosterAdminEditFormValues = z.infer<typeof fosterAdminEditSchema>;
@@ -141,7 +130,7 @@ function getServerErrorMessage(error: unknown): string {
   }
 
   if (code === 'FOSTER_008') {
-    return '임시보호 일정의 순서를 다시 확인해 주세요.';
+    return '상태에 맞는 임시보호 일정 정보를 다시 확인해 주세요.';
   }
 
   if (code === 'FOSTER_013') {
@@ -157,7 +146,7 @@ function getServerErrorMessage(error: unknown): string {
   }
 
   if (code === 'FOSTER_018') {
-    return '종료 처리 시 기존 임시보호 일정은 수정할 수 없습니다.';
+  return '해당 동물은 이미 다른 임시보호 신청이 진행 중입니다.';
   }
 
   if (code === 'FOSTER_003') {

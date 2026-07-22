@@ -71,6 +71,7 @@ export interface FosterAdminListItem {
   fosterStartAt: string | null;
   fosterEndAt: string | null;
   fosterExtendAt: string | null;
+  fosterCompleteAt: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

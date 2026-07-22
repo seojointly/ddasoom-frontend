@@ -1,5 +1,6 @@
 import { axiosInstance } from '@/shared/api/axiosInstance';
 import type { ApiResponse } from '@/shared/types/api';
+import type { UploadedImage } from '@/shared/components/editor/editorImageApi';
 
 // features/admin 도메인 API 모듈 — 관리자 FAQ 관리.
 // 백엔드: support/controller/AdminFaqController.java (/api/admin/faqs, hasRole(ADMIN))
@@ -24,6 +25,8 @@ export interface FaqDetail {
   isVisible: boolean;
   createdAt: string;
   updatedAt: string;
+  // 첨부 이미지 — { imageId, url, isThumbnail }. url은 Presigned(30분 유효).
+  images: UploadedImage[];
 }
 
 // 응답: 카테고리 옵션 (GET /api/faqs/categories) — 드롭다운 채우는 용도
@@ -37,6 +40,8 @@ export interface FaqPayload {
   category: string;
   question: string;
   answer: string;
+  // 최종 유지할 이미지 id 목록 전체 — 수정 시 빠진 id는 서버가 미연결 이미지로 정리한다.
+  imageIds: number[];
 }
 
 // ── API 함수 ────────────────────────────────────────────────────────────
