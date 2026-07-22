@@ -91,18 +91,18 @@ export function useAnimalLikeMutation() {
 
     onMutate: async ({ animalId, currentlyLiked }) => {
       const nextLiked = !currentlyLiked;
-      await queryClient.cancelQueries({ queryKey: queryKeys.animals.all() });
+      await queryClient.cancelQueries({ queryKey: queryKeys.animals.all });
 
       // 롤백용 스냅샷 저장 후, animals 하위 모든 캐시(목록/상세/좋아요목록)에 낙관적 패치
       const snapshot = queryClient.getQueriesData({
-        queryKey: queryKeys.animals.all(),
+        queryKey: queryKeys.animals.all,
       });
-      queryClient.setQueriesData({ queryKey: queryKeys.animals.all() }, (old) =>
+      queryClient.setQueriesData({ queryKey: queryKeys.animals.all }, (old) =>
         patchCache(old, animalId, nextLiked),
       );
 
       // 마이페이지 좋아요 목록: 좋아요 취소면 카드를 목록에서 제거(빈 하트로 남기지 않음).
-      // 스냅샷은 위 all() 조회에 이미 포함돼 있어 롤백은 그대로 커버된다.
+      // 스냅샷은 위 all 조회에 이미 포함돼 있어 롤백은 그대로 커버된다.
       if (
         currentlyLiked &&
         queryClient.getQueryData(queryKeys.animals.likedByMe())

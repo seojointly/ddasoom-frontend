@@ -21,8 +21,8 @@ export const queryKeys = {
   auth: {},
   // features/animals — 유기동물 (김종식)
   animals: {
-    all: () => ['animals'] as const, // 도메인 전체(목록/상세/좋아요목록) 무효화·낙관적 패치 루트
-    lists: () => [...queryKeys.animals.all(), 'list'] as const,
+    all: ['animals'] as const, // 도메인 전체(목록/상세/좋아요목록) 무효화·낙관적 패치 루트
+    lists: () => [...queryKeys.animals.all, 'list'] as const,
     // filters 객체가 그대로 키에 들어가므로, 값 있는 필드만 담아 안정적 키를 유지할 것
     // (타입은 shared→feature 역의존을 피하려 인라인 구조로 둠 — features/animals/types.ts의 AnimalFilters와 동일 구조)
     list: (filters: {
@@ -32,10 +32,10 @@ export const queryKeys = {
       isFostered?: boolean;
       isLiked?: boolean;
     }) => [...queryKeys.animals.lists(), filters] as const,
-    details: () => [...queryKeys.animals.all(), 'detail'] as const,
+    details: () => [...queryKeys.animals.all, 'detail'] as const,
     detail: (id: number) => [...queryKeys.animals.details(), id] as const,
-    likedByMe: () => [...queryKeys.animals.all(), 'liked-by-me'] as const, // 마이페이지 좋아요 목록
-    main: () => [...queryKeys.animals.all(), 'main'] as const,
+    likedByMe: () => [...queryKeys.animals.all, 'liked-by-me'] as const, // 마이페이지 좋아요 목록
+    main: () => [...queryKeys.animals.all, 'main'] as const,
   },
   // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기) (유창호)
   // features/board — 정보교환/입양후기 통합(boardType 파라미터로 분기) (유창호)
