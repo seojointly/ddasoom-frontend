@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 
 import { UserLayout } from '@/shared/layouts/UserLayout';
 import { AdminLayout } from '@/shared/layouts/AdminLayout';
@@ -7,6 +7,7 @@ import { RequireAdmin } from '@/shared/components/common/RequireAdmin';
 
 import { MainPage } from '@/pages/MainPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { ErrorPage } from '@/pages/ErrorPage';
 import { ForbiddenPage } from '@/pages/ForbiddenPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { OAuthCallbackPage } from '@/pages/auth/OAuthCallbackPage';
@@ -60,10 +61,15 @@ import { AdminCommentListPage } from '@/pages/admin/AdminCommentListpage';
 
 // 전체 라우트 정의(단일 파일에서 관리). 역할별 라우트를 한곳에 모아 등록한다.
 // 현재는 경로 등록 + placeholder 페이지 연결까지만. 각 페이지 실제 구현은 도메인 담당자 몫.
+//
+// ⚠️ 최상위 라우트 3갈래에 errorElement(ErrorPage)를 붙여 둔다.
+//    하위 어느 페이지에서 렌더 예외가 나도 트리 전체가 언마운트(흰 화면)되지 않고 폴백 화면이 뜬다.
+//    라우트 이동 시 자동 초기화되므로 별도 리셋 로직이 필요 없다.
 export const router = createBrowserRouter([
   {
     // 일반 사용자 영역: Header/Footer 포함 UserLayout
     element: <UserLayout />,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <MainPage /> }, // `/`
       { path: 'login', element: <LoginPage /> },
@@ -116,18 +122,20 @@ export const router = createBrowserRouter([
         ],
       },
       { path: '*', element: <NotFoundPage /> },
-      { path: 'forbidden', element: <ForbiddenPage /> }, // 403 리다이렉트 (인터셉터가 강제 이동)
-      // ⚠️ catch-all은 항상 맨 마지막 — 위 정적 경로들보다 뒤에 와야 한다.
-      //    (v7 라우트 랭킹 덕에 순서가 어긋나도 당장은 동작하지만, 그 우연에 기대지 않는다)
-      { path: '*', element: <NotFoundPage /> },
+      { path: 'forbidden', element: <ForbiddenPage /> }, // 403 리다이렉트
     ],
   },
-  // 로그인 경로는 /login으로 통일 — 과거 /admin/login 접근은 /login으로 리다이렉트
-  { path: '/admin/login', element: <Navigate to="/login" replace /> },
+  // 관리자 로그인은 공개(가드/AdminLayout 밖)
+  {
+    path: '/admin/login',
+    element: <LoginPage />,
+    errorElement: <ErrorPage />,
+  },
   {
     // 관리자 영역: ADMIN 가드 → AdminLayout
     path: '/admin',
     element: <RequireAdmin />,
+    errorElement: <ErrorPage />,
     children: [
       {
         element: <AdminLayout />,
